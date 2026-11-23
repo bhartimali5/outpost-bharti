@@ -21,7 +21,7 @@ services:
 
   # S3-compatible object storage for pitch-deck uploads (Week 3). Console: http://localhost:9001
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: outpost-minio
     command: server /data --console-address ":9001"
     environment:
