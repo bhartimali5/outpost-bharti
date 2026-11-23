@@ -1,0 +1,59 @@
+# Shared settings for every environment.
+# Profile-specific settings live in the "---" sections below (one file, several documents).
+# NOTE: .gitignore excludes application-local.yml, so profiles are kept in this file on purpose.
+
+spring:
+  application:
+    name: outpost
+  profiles:
+    # Used only when no profile is set explicitly (e.g. plain `./mvnw spring-boot:run`).
+    default: local
+  jpa:
+    open-in-view: false          # no DB session held open during view rendering
+    hibernate:
+      ddl-auto: validate         # Hibernate only checks the schema; Flyway creates it. Never update/create.
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health          # only /actuator/health is exposed
+
+---
+# LOCAL: docker compose Postgres. Every value can be overridden by an env var (see .env.example).
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/outpost}
+    username: ${SPRING_DATASOURCE_USERNAME:outpost}
+    password: ${SPRING_DATASOURCE_PASSWORD:outpost}
+management:
+  endpoint:
+    health:
+      show-details: always       # shows the db component while developing
+
+---
+# TEST: no datasource here on purpose. Testcontainers supplies the URL at test time (story OP-008).
+spring:
+  config:
+    activate:
+      on-profile: test
+
+---
+# PROD: everything comes from env vars, no defaults, so a missing value fails at startup.
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+management:
+  endpoint:
+    health:
+      show-details: never
