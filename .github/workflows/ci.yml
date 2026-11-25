@@ -15,19 +15,13 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-          # cache only once the project exists, otherwise setup-java fails looking for pom.xml
-          cache: ${{ hashFiles('**/pom.xml') != '' && 'maven' || '' }}
+          cache: maven
 
       - name: Build & test
-        run: |
-          if [ ! -f pom.xml ]; then
-            echo "::warning::No pom.xml yet - create the Spring Boot project (see README). CI will run tests once it exists."
-            exit 0
-          fi
-          ./mvnw -B -ntp verify
+        run: ./mvnw -B -ntp verify
 
       - name: Upload test reports
-        if: always() && hashFiles('target/surefire-reports/**') != ''
+        if: failure() && hashFiles('target/surefire-reports/**') != ''
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
