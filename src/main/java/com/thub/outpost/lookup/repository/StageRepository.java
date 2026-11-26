@@ -1,5 +1,6 @@
-package com.thub.outpost.lookup;
+package com.thub.outpost.lookup.repository;
 
+import com.thub.outpost.lookup.entity.Stage;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 

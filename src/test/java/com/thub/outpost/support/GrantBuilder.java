@@ -1,10 +1,10 @@
 package com.thub.outpost.support;
 
-import com.thub.outpost.grant.Grant;
-import com.thub.outpost.grant.GrantType;
-import com.thub.outpost.grant.IssuingBodyType;
-import com.thub.outpost.lookup.Sector;
-import com.thub.outpost.lookup.Stage;
+import com.thub.outpost.grant.entity.Grant;
+import com.thub.outpost.grant.entity.GrantType;
+import com.thub.outpost.grant.entity.IssuingBodyType;
+import com.thub.outpost.lookup.entity.Sector;
+import com.thub.outpost.lookup.entity.Stage;
 import java.time.LocalDate;
 
 /**

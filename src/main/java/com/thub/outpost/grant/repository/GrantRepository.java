@@ -1,5 +1,6 @@
-package com.thub.outpost.grant;
+package com.thub.outpost.grant.repository;
 
+import com.thub.outpost.grant.entity.Grant;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 

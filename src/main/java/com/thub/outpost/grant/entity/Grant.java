@@ -1,8 +1,8 @@
-package com.thub.outpost.grant;
+package com.thub.outpost.grant.entity;
 
 import com.thub.outpost.common.Auditable;
-import com.thub.outpost.lookup.Sector;
-import com.thub.outpost.lookup.Stage;
+import com.thub.outpost.lookup.entity.Sector;
+import com.thub.outpost.lookup.entity.Stage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

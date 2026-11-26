@@ -1,13 +1,16 @@
-package com.thub.outpost.grant;
+package com.thub.outpost.grant.repository;
 
 import static com.thub.outpost.support.GrantBuilder.aGrant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.thub.outpost.lookup.Sector;
-import com.thub.outpost.lookup.SectorRepository;
-import com.thub.outpost.lookup.Stage;
-import com.thub.outpost.lookup.StageRepository;
+import com.thub.outpost.grant.entity.Grant;
+import com.thub.outpost.grant.entity.GrantType;
+import com.thub.outpost.grant.entity.IssuingBodyType;
+import com.thub.outpost.lookup.entity.Sector;
+import com.thub.outpost.lookup.entity.Stage;
+import com.thub.outpost.lookup.repository.SectorRepository;
+import com.thub.outpost.lookup.repository.StageRepository;
 import com.thub.outpost.support.AbstractIntegrationTest;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;

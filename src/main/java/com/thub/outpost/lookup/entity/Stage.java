@@ -1,4 +1,4 @@
-package com.thub.outpost.lookup;
+package com.thub.outpost.lookup.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
