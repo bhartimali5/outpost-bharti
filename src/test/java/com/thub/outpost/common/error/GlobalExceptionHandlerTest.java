@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Slice test: @WebMvcTest starts only the web layer (no database, no Flyway), so it is fast.
  * A throwaway controller throws each exception type and we check status, content type and body shape.
  */
-@WebMvcTest
+@WebMvcTest(controllers = GlobalExceptionHandlerTest.ThrowawayController.class) // only our test controller
 @Import({GlobalExceptionHandler.class, GlobalExceptionHandlerTest.ThrowawayController.class})
 @AutoConfigureMockMvc(addFilters = false) // skip the security filters; we only test error mapping here
 @ExtendWith(OutputCaptureExtension.class)
@@ -69,6 +69,16 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("STAGE_NOT_FOUND"))
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void validationException_withFieldIssues_returnsThemInErrors() throws Exception {
+        mockMvc.perform(get("/test/validation-fields"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.errors.length()").value(1))
+                .andExpect(jsonPath("$.errors[0].field").value("stageIds"))
+                .andExpect(jsonPath("$.errors[0].message").value("unknown stage id(s)"));
     }
 
     @Test
@@ -166,6 +176,12 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/validation")
         void validation() {
             throw new ValidationException("STAGE_NOT_FOUND", "Stage does not exist");
+        }
+
+        @GetMapping("/test/validation-fields")
+        void validationWithFields() {
+            throw new ValidationException("VALIDATION_FAILED", "Validation failed",
+                    java.util.List.of(new FieldIssue("stageIds", "unknown stage id(s)")));
         }
 
         @GetMapping("/test/forbidden")

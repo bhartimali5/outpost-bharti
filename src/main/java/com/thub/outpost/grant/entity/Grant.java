@@ -234,6 +234,27 @@ public class Grant extends Auditable {
         return expired;
     }
 
+    // Intent-revealing state changes: the service calls these instead of flipping flags directly.
+    public void publish() {
+        this.published = true;
+    }
+
+    public void unpublish() {
+        this.published = false;
+    }
+
+    public void expire() {
+        this.expired = true;
+    }
+
+    /** Derived from the published/expired flags; there is no column for it. */
+    public GrantStatus getStatus() {
+        if (expired) {
+            return GrantStatus.EXPIRED;
+        }
+        return published ? GrantStatus.PUBLISHED : GrantStatus.DRAFT;
+    }
+
     public void setExpired(boolean expired) {
         this.expired = expired;
     }

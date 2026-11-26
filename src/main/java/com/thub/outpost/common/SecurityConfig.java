@@ -23,6 +23,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // TODO(OP-027): REMOVE this line. Admin endpoints are open ONLY because login does not
+                        // exist yet (OP-010 story: "until OP-027 lands, admin endpoints are open").
+                        // OP-027 must require role ADMIN here, and fix AdminGrantSecurityPlaceholderIT.
+                        .requestMatchers("/api/v1/admin/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
