@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,6 +41,7 @@ public final class GrantSpecifications {
         // Specification.allOf ignores null entries, so "filter not set" is simply null here.
         return Specification.allOf(
                 isVisibleToFounders(),
+                whenSet(blankToNull(filter.q()), GrantSpecifications::matchesKeyword),
                 whenSet(filter.issuingBodyType(), GrantSpecifications::hasIssuingBodyType),
                 whenSet(filter.type(), GrantSpecifications::hasType),
                 whenSet(filter.stageId(), GrantSpecifications::hasStage),
@@ -53,6 +55,22 @@ public final class GrantSpecifications {
         return (root, query, cb) -> cb.and(
                 cb.isTrue(root.get("published")),
                 cb.isFalse(root.get("expired")));
+    }
+
+    /**
+     * Keyword search: the text appears in the name, the issuing body or the summary, ignoring case.
+     * Equivalent to PostgreSQL's {@code ILIKE '%text%'} on those three columns (written as lower() + LIKE, which
+     * is the portable form in JPA).
+     *
+     * LIMITS: a leading wildcard cannot use a normal index, so Postgres scans the table. That is fine for a
+     * directory of a few thousand grants. When it grows, switch to a pg_trgm GIN index or full-text search.
+     */
+    public static Specification<Grant> matchesKeyword(String text) {
+        String pattern = "%" + escapeLikeWildcards(text.trim().toLowerCase(Locale.ROOT)) + "%";
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("name")), pattern, LIKE_ESCAPE),
+                cb.like(cb.lower(root.get("issuingBody")), pattern, LIKE_ESCAPE),
+                cb.like(cb.lower(root.get("summary")), pattern, LIKE_ESCAPE));
     }
 
     public static Specification<Grant> hasIssuingBodyType(IssuingBodyType issuingBodyType) {
@@ -110,5 +128,19 @@ public final class GrantSpecifications {
     /** Builds the Specification only when the filter value was supplied; otherwise null (= no restriction). */
     private static <V> Specification<Grant> whenSet(V value, Function<V, Specification<Grant>> factory) {
         return value == null ? null : factory.apply(value);
+    }
+
+    private static String blankToNull(String text) {
+        return text == null || text.isBlank() ? null : text;
+    }
+
+    private static final char LIKE_ESCAPE = '\\';
+
+    /**
+     * In a LIKE pattern, % and _ are wildcards. A user searching for "100%" means the literal percent sign, so
+     * those characters (and the escape character itself) are escaped. Without this, "%" would match everything.
+     */
+    private static String escapeLikeWildcards(String text) {
+        return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 }

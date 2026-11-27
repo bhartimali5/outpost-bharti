@@ -32,7 +32,8 @@ public class GrantQueryService {
     /** Published, non-expired grants matching every filter that is set, one page at a time. */
     public PageResponse<GrantCardResponse> list(GrantFilter filter, Pageable pageable) {
         LocalDate today = LocalDate.now(clock); // from the injected Clock, never LocalDate.now() directly
-        Page<Grant> page = grants.findAll(GrantSpecifications.forFilter(filter, today), pageable);
+        Pageable checked = GrantPaging.validated(pageable); // 400 for size > 50 or a sort field not whitelisted
+        Page<Grant> page = grants.findAll(GrantSpecifications.forFilter(filter, today), checked);
         return PageResponse.from(page, GrantCardResponse::from);
     }
 }

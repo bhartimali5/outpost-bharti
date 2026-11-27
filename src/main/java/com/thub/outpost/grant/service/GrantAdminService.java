@@ -62,7 +62,8 @@ public class GrantAdminService {
 
     /** @param status optional filter; null returns everything (drafts, published and expired). */
     @Transactional(readOnly = true)
-    public PageResponse<GrantResponse> list(GrantStatus status, Pageable pageable) {
+    public PageResponse<GrantResponse> list(GrantStatus status, Pageable requested) {
+        Pageable pageable = GrantPaging.validated(requested); // 400 for size > 50 or a sort field not whitelisted
         Page<Grant> page;
         if (status == null) {
             page = grants.findAll(pageable);
