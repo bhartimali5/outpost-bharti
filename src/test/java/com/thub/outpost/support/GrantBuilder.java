@@ -26,6 +26,8 @@ public final class GrantBuilder {
     private String summary = "Seed funding for early-stage startups.";
     private String sourceUrl = "https://example.org/seed-fund";
     private String eligibility;
+    private String whatIsFunded;
+    private String howToApply;
     private LocalDate deadline;
     private BigDecimal amountMax;
     private String amountDisplay;
@@ -64,6 +66,21 @@ public final class GrantBuilder {
 
     public GrantBuilder withEligibility(String eligibility) {
         this.eligibility = eligibility;
+        return this;
+    }
+
+    public GrantBuilder withWhatIsFunded(String whatIsFunded) {
+        this.whatIsFunded = whatIsFunded;
+        return this;
+    }
+
+    public GrantBuilder withHowToApply(String howToApply) {
+        this.howToApply = howToApply;
+        return this;
+    }
+
+    public GrantBuilder withSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
         return this;
     }
 
@@ -113,6 +130,8 @@ public final class GrantBuilder {
         Grant grant = new Grant(name, issuingBody, issuingBodyType, type, summary, sourceUrl);
         grant.setDeadline(deadline);
         grant.setEligibility(eligibility);
+        grant.setWhatIsFunded(whatIsFunded);
+        grant.setHowToApply(howToApply);
         grant.setAmountMax(amountMax);
         grant.setAmountDisplay(amountDisplay);
         grant.setPublished(published);

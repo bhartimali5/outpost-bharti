@@ -3,6 +3,7 @@ package com.thub.outpost.grant.repository;
 import com.thub.outpost.grant.entity.Grant;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,12 @@ public interface GrantRepository extends JpaRepository<Grant, UUID>, JpaSpecific
 
     /** WHERE published = false AND expired = false */
     Page<Grant> findByPublishedFalseAndExpiredFalse(Pageable pageable);
+
+    /**
+     * WHERE id = ? AND published = true. Founders must never see drafts, so a draft is simply "not found" here:
+     * the database never returns it, and the API cannot tell a draft apart from an id that does not exist.
+     */
+    Optional<Grant> findByIdAndPublishedTrue(UUID id);
 
     /**
      * Marks every not-yet-expired grant whose deadline is before {@code today} as expired, in ONE UPDATE statement,

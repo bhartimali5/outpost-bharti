@@ -1,13 +1,16 @@
 package com.thub.outpost.grant.service;
 
 import com.thub.outpost.common.PageResponse;
+import com.thub.outpost.common.error.NotFoundException;
 import com.thub.outpost.grant.dto.GrantCardResponse;
+import com.thub.outpost.grant.dto.GrantDetailResponse;
 import com.thub.outpost.grant.dto.GrantFilter;
 import com.thub.outpost.grant.entity.Grant;
 import com.thub.outpost.grant.repository.GrantRepository;
 import com.thub.outpost.grant.repository.GrantSpecifications;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,5 +38,15 @@ public class GrantQueryService {
         Pageable checked = GrantPaging.validated(pageable); // 400 for size > 50 or a sort field not whitelisted
         Page<Grant> page = grants.findAll(GrantSpecifications.forFilter(filter, today), checked);
         return PageResponse.from(page, GrantCardResponse::from);
+    }
+
+    /**
+     * One published grant, expired or not. A draft gets exactly the same 404 as an id that does not exist
+     * (GRANT_NOT_FOUND), so the API does not reveal that an unpublished grant is there.
+     */
+    public GrantDetailResponse get(UUID id) {
+        return grants.findByIdAndPublishedTrue(id)
+                .map(GrantDetailResponse::from)
+                .orElseThrow(() -> new NotFoundException("Grant", id));
     }
 }

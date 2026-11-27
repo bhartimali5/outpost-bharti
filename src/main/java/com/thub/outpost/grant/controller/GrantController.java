@@ -3,20 +3,27 @@ package com.thub.outpost.grant.controller;
 import com.thub.outpost.common.OpenApiConfig;
 import com.thub.outpost.common.PageResponse;
 import com.thub.outpost.grant.dto.GrantCardResponse;
+import com.thub.outpost.grant.dto.GrantDetailResponse;
 import com.thub.outpost.grant.dto.GrantFilter;
 import com.thub.outpost.grant.service.GrantQueryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Founder-facing grants. Requires a signed-in user (login arrives with OP-017).
- * Only published, non-expired grants are ever returned.
+ * Founders only ever see published grants; drafts do not exist as far as this API is concerned.
  */
 @RestController
 @RequestMapping("/api/v1/grants")
@@ -44,11 +51,32 @@ public class GrantController {
                     includeExpired: expired grants are hidden by default; true includes them, marked expired: true.
                     Paging: size is at most 50 (400 above that). sort may be deadline, name or createdAt, for example
                     sort=name,desc (anything else is a 400). The default is deadline soonest first, then name.
-                    Rolling grants (no deadline) always come last.
-                    A search with no matches is still a 200 with an empty content list, never a 404.""")
+                    Rolling grants (no deadline) always come last.""")
+    // The empty-state contract, stated where clients read it: no matches is a normal, successful answer.
+    @ApiResponse(responseCode = "200", description = """
+            One page of grant cards. EMPTY-STATE CONTRACT: when nothing matches (no grants at all, or no grants for \
+            these filters) the response is still 200, with content = [], totalElements = 0 and totalPages = 0. \
+            It is never a 404. Clients show their "no results" message when content is empty.""")
+    @ApiResponse(responseCode = "400", description = "An unknown filter value, size above 50 or a sort field that is "
+            + "not allowed. errors[] says which.",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
     public PageResponse<GrantCardResponse> list(
             @ParameterObject GrantFilter filter,
             @ParameterObject @PageableDefault(size = 20, sort = {"deadline", "name"}) Pageable pageable) {
         return service.list(filter, pageable);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Grant detail page",
+            description = "Everything a founder needs to decide, plus sourceUrl: the link to the real application. "
+                    + "Expired grants are still returned, with expired: true.")
+    @ApiResponse(responseCode = "200", description = "The grant.")
+    @ApiResponse(responseCode = "404", description = "GRANT_NOT_FOUND: no published grant has this id. "
+            + "Drafts get the same 404 as ids that do not exist.",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "The id is not a valid UUID.",
+            content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+    public GrantDetailResponse get(@PathVariable UUID id) {
+        return service.get(id);
     }
 }
