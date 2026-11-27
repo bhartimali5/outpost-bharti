@@ -25,6 +25,7 @@ public final class GrantBuilder {
     private GrantType type = GrantType.GRANT;
     private String summary = "Seed funding for early-stage startups.";
     private String sourceUrl = "https://example.org/seed-fund";
+    private String eligibility;
     private LocalDate deadline;
     private BigDecimal amountMax;
     private String amountDisplay;
@@ -53,6 +54,16 @@ public final class GrantBuilder {
 
     public GrantBuilder ofType(GrantType type) {
         this.type = type;
+        return this;
+    }
+
+    public GrantBuilder withSummary(String summary) {
+        this.summary = summary;
+        return this;
+    }
+
+    public GrantBuilder withEligibility(String eligibility) {
+        this.eligibility = eligibility;
         return this;
     }
 
@@ -101,6 +112,7 @@ public final class GrantBuilder {
     public Grant build() {
         Grant grant = new Grant(name, issuingBody, issuingBodyType, type, summary, sourceUrl);
         grant.setDeadline(deadline);
+        grant.setEligibility(eligibility);
         grant.setAmountMax(amountMax);
         grant.setAmountDisplay(amountDisplay);
         grant.setPublished(published);

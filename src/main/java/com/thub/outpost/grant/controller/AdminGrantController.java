@@ -56,7 +56,8 @@ public class AdminGrantController {
 
     @GetMapping
     @Operation(summary = "List all grants, including drafts and expired",
-            description = "Optional status filter: published, draft or expired. Paged: page, size, sort.")
+            description = "Optional status filter: published, draft or expired. Paged: size at most 50; "
+                    + "sort may be deadline, name or createdAt (default: newest first).")
     public PageResponse<GrantResponse> list(
             @RequestParam(required = false) GrantStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
