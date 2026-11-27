@@ -9,7 +9,9 @@ import java.util.UUID;
 
 /**
  * One card in the founder grants listing: only what the card shows, nothing internal
- * (no published/expired flags, no timestamps, no long text fields).
+ * (no published flag, no timestamps, no long text fields).
+ *
+ * {@code expired} is false in the default view; it can only be true when the founder asked for includeExpired=true.
  *
  * A rolling grant has no deadline: {@code deadline} is null and {@code rolling} is true. Two typed fields,
  * instead of one field that is sometimes a date and sometimes the text "rolling", keep the contract clear
@@ -25,6 +27,7 @@ public record GrantCardResponse(
         String amountDisplay,
         LocalDate deadline,
         boolean rolling,
+        boolean expired,
         List<LookupItem> stages,
         List<LookupItem> sectors) {
 
@@ -37,6 +40,7 @@ public record GrantCardResponse(
                 grant.getAmountDisplay(),
                 grant.getDeadline(),
                 grant.getDeadline() == null,
+                grant.isExpired(),
                 LookupItem.ofStages(grant.getStages()),
                 LookupItem.ofSectors(grant.getSectors()));
     }

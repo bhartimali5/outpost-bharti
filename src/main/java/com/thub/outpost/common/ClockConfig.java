@@ -15,7 +15,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClockConfig {
 
-    public static final ZoneId BUSINESS_ZONE = ZoneId.of("Asia/Kolkata");
+    /** As a String constant so annotations can use it too, e.g. @Scheduled(zone = ClockConfig.BUSINESS_ZONE_ID). */
+    public static final String BUSINESS_ZONE_ID = "Asia/Kolkata";
+
+    public static final ZoneId BUSINESS_ZONE = ZoneId.of(BUSINESS_ZONE_ID);
 
     @Bean
     Clock clock() {

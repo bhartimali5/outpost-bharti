@@ -31,6 +31,12 @@ management:
       exposure:
         include: health          # only /actuator/health is exposed
 
+outpost:
+  jobs:
+    grant-expiry:
+      # Every night at 00:05 India time (fields: second minute hour day-of-month month day-of-week).
+      cron: "0 5 0 * * *"
+
 ---
 # LOCAL: docker compose Postgres. Every value can be overridden by an env var (see .env.example).
 spring:
@@ -52,6 +58,10 @@ spring:
   config:
     activate:
       on-profile: test
+outpost:
+  jobs:
+    grant-expiry:
+      cron: "-"                  # "-" switches the schedule off; tests call the job directly with a fixed Clock
 
 ---
 # PROD: everything comes from env vars, no defaults, so a missing value fails at startup.
