@@ -5,6 +5,7 @@ import com.thub.outpost.grant.entity.GrantType;
 import com.thub.outpost.grant.entity.IssuingBodyType;
 import com.thub.outpost.lookup.entity.Sector;
 import com.thub.outpost.lookup.entity.Stage;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -25,6 +26,8 @@ public final class GrantBuilder {
     private String summary = "Seed funding for early-stage startups.";
     private String sourceUrl = "https://example.org/seed-fund";
     private LocalDate deadline;
+    private BigDecimal amountMax;
+    private String amountDisplay;
     private boolean published;
     private boolean expired;
     private Stage[] stages = new Stage[0];
@@ -58,6 +61,17 @@ public final class GrantBuilder {
         return this;
     }
 
+    /** The most a founder can receive; this is what the amount bands are based on. */
+    public GrantBuilder withAmountMax(long amountMax) {
+        this.amountMax = BigDecimal.valueOf(amountMax);
+        return this;
+    }
+
+    public GrantBuilder withAmountDisplay(String amountDisplay) {
+        this.amountDisplay = amountDisplay;
+        return this;
+    }
+
     /** No deadline: a rolling grant. This is also the default. */
     public GrantBuilder rolling() {
         this.deadline = null;
@@ -87,6 +101,8 @@ public final class GrantBuilder {
     public Grant build() {
         Grant grant = new Grant(name, issuingBody, issuingBodyType, type, summary, sourceUrl);
         grant.setDeadline(deadline);
+        grant.setAmountMax(amountMax);
+        grant.setAmountDisplay(amountDisplay);
         grant.setPublished(published);
         grant.setExpired(expired);
         for (Stage stage : stages) {

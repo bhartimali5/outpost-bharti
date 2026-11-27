@@ -5,12 +5,9 @@ import com.thub.outpost.grant.entity.GrantStatus;
 import com.thub.outpost.grant.entity.GrantType;
 import com.thub.outpost.grant.entity.IssuingBodyType;
 import com.thub.outpost.lookup.dto.LookupItem;
-import com.thub.outpost.lookup.entity.Sector;
-import com.thub.outpost.lookup.entity.Stage;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,13 +60,9 @@ public record GrantResponse(
                 grant.isPublished(),
                 grant.isExpired(),
                 grant.getStatus(),
-                // A Set has no order, so sort for a stable, predictable response.
-                grant.getStages().stream()
-                        .sorted(Comparator.comparingInt(Stage::getSortOrder).thenComparing(Stage::getName))
-                        .map(LookupItem::from).toList(),
-                grant.getSectors().stream()
-                        .sorted(Comparator.comparingInt(Sector::getSortOrder).thenComparing(Sector::getName))
-                        .map(LookupItem::from).toList(),
+                // A Set has no order; LookupItem sorts for a stable, predictable response.
+                LookupItem.ofStages(grant.getStages()),
+                LookupItem.ofSectors(grant.getSectors()),
                 grant.getCreatedAt(),
                 grant.getUpdatedAt());
     }

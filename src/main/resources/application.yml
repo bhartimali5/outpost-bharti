@@ -12,6 +12,11 @@ spring:
     open-in-view: false          # no DB session held open during view rendering
     hibernate:
       ddl-auto: validate         # Hibernate only checks the schema; Flyway creates it. Never update/create.
+    properties:
+      hibernate:
+        # When lazy collections (a grant's stages/sectors) are loaded for one entity, load them for up to 50
+        # entities of the same page in ONE query. Without it, a page of 20 grants runs 40 extra queries (N+1).
+        default_batch_fetch_size: 50
   flyway:
     enabled: true
 
