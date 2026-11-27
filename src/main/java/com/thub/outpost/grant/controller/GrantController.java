@@ -41,6 +41,7 @@ public class GrantController {
                     q: keyword search over name, issuing body and summary (case-insensitive, partial words match).
                     amountBand is based on the grant's maximum amount: UNDER_10L (< 10 lakh), 10L_50L, 50L_1CR, OVER_1CR (>= 1 crore).
                     deadline: OPEN_NOW (rolling or not yet passed), CLOSING_THIS_MONTH, ROLLING (no deadline).
+                    includeExpired: expired grants are hidden by default; true includes them, marked expired: true.
                     Paging: size is at most 50 (400 above that). sort may be deadline, name or createdAt, for example
                     sort=name,desc (anything else is a 400). The default is deadline soonest first, then name.
                     Rolling grants (no deadline) always come last.

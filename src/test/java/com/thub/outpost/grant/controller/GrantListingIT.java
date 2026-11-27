@@ -110,7 +110,7 @@ class GrantListingIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.content[0].sectors[0].name").value(sectorA.getName()))
                 // internal or heavy fields must not leak into the card
                 .andExpect(jsonPath("$.content[0].published").doesNotExist())
-                .andExpect(jsonPath("$.content[0].expired").doesNotExist())
+                .andExpect(jsonPath("$.content[0].expired").value(false))
                 .andExpect(jsonPath("$.content[0].summary").doesNotExist())
                 .andExpect(jsonPath("$.content[0].createdAt").doesNotExist());
     }

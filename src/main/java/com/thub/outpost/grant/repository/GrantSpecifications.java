@@ -33,14 +33,16 @@ public final class GrantSpecifications {
     }
 
     /**
-     * The whole founder-facing query: the default view (published and not expired) plus whichever filters are set.
+     * The whole founder-facing query: published grants, minus expired ones unless includeExpired is true,
+     * plus whichever filters are set.
      *
      * @param today the current date from the application Clock, used by the deadline filters
      */
     public static Specification<Grant> forFilter(GrantFilter filter, LocalDate today) {
         // Specification.allOf ignores null entries, so "filter not set" is simply null here.
         return Specification.allOf(
-                isVisibleToFounders(),
+                isPublished(),
+                filter.includesExpired() ? null : isNotExpired(),
                 whenSet(blankToNull(filter.q()), GrantSpecifications::matchesKeyword),
                 whenSet(filter.issuingBodyType(), GrantSpecifications::hasIssuingBodyType),
                 whenSet(filter.type(), GrantSpecifications::hasType),
@@ -50,11 +52,14 @@ public final class GrantSpecifications {
                 whenSet(filter.deadline(), deadline -> matchesDeadline(deadline, today)));
     }
 
-    /** The default view: published and not expired. Drafts and expired grants never reach founders. */
-    public static Specification<Grant> isVisibleToFounders() {
-        return (root, query, cb) -> cb.and(
-                cb.isTrue(root.get("published")),
-                cb.isFalse(root.get("expired")));
+    /** Drafts never reach founders, not even with includeExpired. */
+    public static Specification<Grant> isPublished() {
+        return (root, query, cb) -> cb.isTrue(root.get("published"));
+    }
+
+    /** The default view hides expired grants. */
+    public static Specification<Grant> isNotExpired() {
+        return (root, query, cb) -> cb.isFalse(root.get("expired"));
     }
 
     /**

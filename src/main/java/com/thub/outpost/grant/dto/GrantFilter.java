@@ -6,11 +6,15 @@ import java.util.UUID;
 
 /**
  * The optional filters of the founder grants listing, bound from the query string:
- * {@code ?q=women&issuingBodyType=CENTRAL&type=GRANT&stageId=...&sectorId=...&amountBand=10L_50L&deadline=OPEN_NOW}.
+ * {@code ?q=women&issuingBodyType=CENTRAL&type=GRANT&stageId=...&sectorId=...&amountBand=10L_50L&deadline=OPEN_NOW
+ * &includeExpired=true}.
  * Every field is optional (null = "do not filter on this"); the filters that are given are combined with AND.
  *
  * {@code q} is a keyword search: it matches grants whose name, issuing body or summary contains the text,
  * ignoring case. A blank q is treated as not given.
+ *
+ * {@code includeExpired}: expired grants are hidden by default; true includes them (each card says expired: true).
+ * A Boolean rather than boolean, so a missing parameter binds to null (= false) instead of failing.
  */
 public record GrantFilter(
         String q,
@@ -19,5 +23,10 @@ public record GrantFilter(
         UUID stageId,
         UUID sectorId,
         AmountBand amountBand,
-        DeadlineFilter deadline) {
+        DeadlineFilter deadline,
+        Boolean includeExpired) {
+
+    public boolean includesExpired() {
+        return Boolean.TRUE.equals(includeExpired);
+    }
 }

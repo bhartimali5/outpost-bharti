@@ -12,10 +12,12 @@ import com.thub.outpost.lookup.entity.Stage;
 import com.thub.outpost.lookup.repository.SectorRepository;
 import com.thub.outpost.lookup.repository.StageRepository;
 import com.thub.outpost.support.AbstractIntegrationTest;
+import com.thub.outpost.support.TestDataCleaner;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -46,6 +48,20 @@ class GrantPersistenceIT extends AbstractIntegrationTest {
 
     @Autowired
     JdbcTemplate jdbc;
+
+    @Autowired
+    TestDataCleaner cleaner;
+
+    /**
+     * Other test classes commit grants for real and leave them behind, and the order in which test classes run
+     * differs between machines (it did between a Mac and the CI runner). So start from an empty table.
+     * Inside this class's test transaction the TRUNCATE is rolled back too, which is fine: the table is empty
+     * for the duration of the test, and that is all that matters.
+     */
+    @BeforeEach
+    void startFromAnEmptyTable() {
+        cleaner.clean("grant");
+    }
 
     @Test
     void saveAndReload_keepsTwoStagesAndTwoSectors() {
@@ -90,10 +106,12 @@ class GrantPersistenceIT extends AbstractIntegrationTest {
 
     @Test
     void enums_areStoredAsText_notNumbers() {
-        grants.save(aGrant().issuedBy("Telangana Govt", IssuingBodyType.STATE).ofType(GrantType.SUBSIDY).build());
+        Grant saved = grants.save(aGrant().issuedBy("Telangana Govt", IssuingBodyType.STATE).ofType(GrantType.SUBSIDY).build());
         entityManager.flush();
 
-        Map<String, Object> row = jdbc.queryForMap("SELECT issuing_body_type, type FROM \"grant\"");
+        // Look up this test's own row by id: never assume the table holds only what this test inserted.
+        Map<String, Object> row = jdbc.queryForMap(
+                "SELECT issuing_body_type, type FROM \"grant\" WHERE id = ?", saved.getId());
 
         assertThat(row).containsEntry("issuing_body_type", "STATE").containsEntry("type", "SUBSIDY");
     }
